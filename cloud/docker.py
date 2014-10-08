@@ -204,6 +204,13 @@ options:
     default: ''
     aliases: []
     version_added: "1.8"
+  insecure_registry:
+    description:
+      - The remote registry URL to use for pulling images.
+    required: false
+    default: ''
+    aliases: []
+    version_added: "???"
 
 author: Cove Schneider, Joshua Conner, Pavel Antonov
 requirements: [ "docker-py >= 0.3.0", "docker >= 0.10.0" ]
@@ -388,7 +395,7 @@ class DockerManager:
                 if len(parts) == 2:
                     self.volumes[parts[1]] = {}
                     self.binds[parts[0]] = parts[1]
-                # with bind mode 
+                # with bind mode
                 elif len(parts) == 3:
                     if parts[2] not in ['ro', 'rw']:
                         self.module.fail_json(msg='bind mode needs to either be "ro" or "rw"')
@@ -635,7 +642,7 @@ class DockerManager:
                 except:
                     self.module.fail_json(msg="failed to login to the remote registry, check your username/password.")
             try:
-                self.client.pull(image, tag=tag)
+                self.client.pull(image, tag=tag, insecure_registry=self.module.params.get('insecure_registry'))
             except:
                 self.module.fail_json(msg="failed to pull the specified image: %s" % resource)
             self.increment_counter('pull')
@@ -729,6 +736,7 @@ def main():
             password        = dict(),
             email           = dict(),
             registry        = dict(),
+            insecure_registry = dict(default=False, type='bool'),
             hostname        = dict(default=None),
             env             = dict(type='dict'),
             dns             = dict(),
@@ -740,7 +748,7 @@ def main():
             tty             = dict(default=False, type='bool'),
             lxc_conf        = dict(default=None, type='list'),
             name            = dict(default=None),
-            net             = dict(default=None)
+            net             = dict(default=None),
         )
     )
 
